@@ -1,0 +1,191 @@
+# Import the packages
+import numpy as np
+
+# Define constants
+mu = 1
+
+# Lets first generate the grid
+
+electron_grid = np.zeros((50, 50))
+# Now, make this a random matrix
+for i in range(50):
+    for j in range(50):
+        electron_grid[i, j] = (np.random.randint(0, 2) * 2) - 1
+print(electron_grid)
+
+# The temperature list
+T = [0.01, 0.1, 1, 2, 3, 4, 5, 10, 100]
+
+# Now, we have to compute the energy of the initial configuration
+
+
+def hamiltonian(electron_grid):
+    h_0 = 0
+    H_0 = 0
+    for x in range(49):
+        for y in range(49):
+            h_0 += electron_grid[x][y] * electron_grid[x + 1][y]
+            h_0 += electron_grid[x][y] * electron_grid[x][y + 1]
+    H_0 = -h_0
+    return H_0
+
+
+print(hamiltonian(electron_grid))
+
+# Find a random element in the matrix to flip
+
+
+def flip(electron_grid):
+    random_coloumn = np.random.randint(0, 50)
+    random_row = np.random.randint(0, 50)
+    electron_grid[random_coloumn,
+                  random_row] = (-1) * electron_grid[random_coloumn,
+                                                     random_row]
+    return electron_grid
+
+
+print(flip(electron_grid))
+
+N = 50
+
+# Import the packages
+import numpy as np
+
+# Define constants
+mu = 1
+
+# Lets first generate the grid
+
+electron_grid = np.zeros((N, N))
+# Now, make this a random matrix
+for i in range(N):
+    for j in range(N):
+        electron_grid[i, j] = (np.random.randint(0, 2) * 2) - 1
+print(electron_grid)
+
+
+def time_evo(iterations, electron_grid,
+           T):  # Notice electron_grid is the initial matrix
+    for i in range(iterations):
+        # Lets first flip the matrix
+        x = np.random.randint(0, N)
+        y = np.random.randint(0, N)
+        electron_grid[x, y] = (-1) * electron_grid[x, y]
+        # Calculate the difference in energy
+        energy_after = electron_grid[x, y] * (
+            electron_grid[(x + 1) % N, y] + electron_grid[x - 1, y] +
+            electron_grid[x, (y + 1) % N] + electron_grid[x, y - 1])
+
+        # energy after flip = (-1)* energy before flip
+
+        # if energy_after < 0:
+        # do no thing (i.e. keep the flip)
+
+        if energy_after < 0:
+            random_number = np.random.random()
+            P = np.exp(
+                (2 * energy_after) / T)  # Calculate the probablity of flipped
+
+            # if random_number <= P:
+            # do no thing (i.e. keep the flip)
+
+            if random_number > P:
+                electron_grid[x, y] = (-1) * electron_grid[x, y]
+    return electron_grid
+
+
+# try time_evo
+print(time_evo(1, electron_grid, 1))
+
+#Calculate average magnetic moment
+
+
+def average_magnet_moment(electron_grid):
+    return mu * (electron_grid.sum())
+# Calculate M vs T and plot it here
+
+temperature = [0.01, 0.1, 1, 2, 3, 4, 5, 10, 100]
+
+
+def curie_temperature(temperature, loops):
+    max_acc = []
+    for T in temperature:
+        acc = []
+        for loop in range(loops):
+            electron_grid = np.zeros((N, N))
+            # Now, make this a random matrix
+            for i in range(N):
+                for j in range(N):
+                    electron_grid[i, j] = (np.random.randint(0, 2) * 2) - 1
+            acc.append(
+                np.abs(average_magnet_moment(time_evo(600000, electron_grid,
+                                                    T))))
+        # Take the maximum for each temperature
+        M_max = max(acc)
+        print('The average magnetic moment of temperature {} is {}'.format(
+            T, M_max))
+        max_acc.append(M_max)
+    return max_acc
+
+
+# Now We want to plot
+import matplotlib.pyplot as plt
+M_Values = curie_temperature(temperature, 5)
+temp_log = np.log(temperature)
+plt.plot(temp_log, M_Values, label="M vs T")
+plt.xlabel('log(Temperature)')
+plt.ylabel('Magnetic Moment')
+plt.title('Plot of Magnetic Moment vs. log(Temperature)')
+plt.axis()
+plt.legend()
+plt.show()
+
+
+# Import Packages
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from IPython.display import HTML
+
+# Define constants and generate frid
+N = 50
+mu = 1
+temp = 0.1
+
+electron_grid = np.zeros((N, N))
+for i in range(N):
+    for j in range(N):
+        electron_grid[i, j] = (np.random.randint(0, 2) * 2) - 1
+
+# Notice we want 300 frames at 2000 steps apart each
+steps = 2000
+
+fig = plt.figure()
+ims = []
+for add in np.arange(300):
+    base = time_evo(steps, electron_grid, temp)
+    electron_grid = base.copy()  # update electron grid
+    ims.append((plt.imshow(base), ))  # each image added as a tuple
+    # ims.append((plt.pcolor(base), ))
+    # ims.append((plt.pcolormesh(base), ))
+
+imani = animation.ArtistAnimation(fig, ims, interval=50, repeat=False)
+# repeat is ignored with the file output we produce here, but can be
+# useful for other output forms.
+
+# Save to a file: (which can be viewed from outside of the notebook
+# or from within the notebook...
+
+imani.save('random.webm', extra_args=['-vcodec', 'libvpx'])
+plt.close()  # this prevents a stray plot from appearing.
+del ims  # these two lines allow the memory held by the images
+del imani  # to be released. This will be important on cocalc.
+
+# Insert the file into the notebook:
+# this links the video into the notebook page:
+HTML(
+    '<video controls autoplay> <source src="random.webm" type="video/webm"></video>'
+)
+# You can add the word loop between video and controls to cause the
+# video to play over and over again. The HTML line must be the last
+# line in the cell.
