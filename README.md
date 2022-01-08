@@ -1,5 +1,5 @@
 # Ising-Model
-A simple time evolution of an Ising Model. Completed under the supervision of Dr. Carl Michal at UBC
+A simple time evolution of an Ising Model. Completed under the supervision of Dr. Carl Michal at UBC. Code for animation is provided by Dr. Michal. 
 
 This code was originally written in sections, thus we see that the code are within blocks, with each blocks completeing a section of what we want it to do. 
 We are working with a square grid of electrons, with either spin 1 or -1. We worked with mu = 1, but this code can also work with different values of mu, and with different grid sizes. We assume ther are no external fields, which simplifies the hamiltonian into H(\sigma )=-J \sum \sigma _{i}\sigma _{j}. In this code, we also assumed J = 1. 
